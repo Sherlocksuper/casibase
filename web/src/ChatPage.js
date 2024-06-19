@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import React from "react";
-import {Button, Modal, Spin} from "antd";
-import {CloseCircleFilled} from "@ant-design/icons";
+import {Affix, Button, Modal, Spin} from "antd";
+import {CloseCircleFilled, RobotOutlined} from "@ant-design/icons";
 import moment from "moment";
 import ChatMenu from "./ChatMenu";
 import ChatBox from "./ChatBox";
@@ -39,6 +39,8 @@ class ChatPage extends BaseListPage {
       disableInput: false,
       isModalOpen: false,
       dots: "⚫",
+      isSelectAI: false,
+      currentSelectBot: "",
     });
 
     this.fetch();
@@ -402,6 +404,18 @@ class ChatPage extends BaseListPage {
     );
   }
 
+  renderSelectAIBots() {
+    return (
+      <Modal open={this.state.isSelectAI} style={{}} onCancel={() => {
+        this.setState({
+          isSelectAI: false,
+        });
+      }}>
+        <p>123</p>
+      </Modal>
+    );
+  }
+
   renderTable(chats) {
     const onSelectChat = (i) => {
       const chat = chats[i];
@@ -467,6 +481,16 @@ class ChatPage extends BaseListPage {
               }}>
               </div>
             )
+          }
+          <Affix offsetTop={0} style={{position: "absolute", top: "0%", right: "5%", zIndex: 1000}}>
+            <Button type="primary" shape="circle" icon={<RobotOutlined />} onClick={() => {
+              this.setState({
+                isSelectAI: true,
+              });
+            }} />
+          </Affix>
+          {
+            this.renderSelectAIBots()
           }
           <ChatBox disableInput={this.state.disableInput} messages={this.state.messages} sendMessage={(text, fileName, regenerate = false) => {this.sendMessage(text, fileName, false, regenerate);}} account={this.props.account} dots={this.state.dots} />
         </div>
