@@ -31,6 +31,9 @@ class ChatPrompts extends React.Component {
   componentDidMount() {
     this.getPrompts();
   }
+  shouldComponentUpdate(nextProps, nextState) {
+    return this.state.prompts !== nextState.prompts;
+  }
 
   selectPrompts = () => {
     const limit = Setting.isMobile() ? 4 : 8;
@@ -109,7 +112,20 @@ class ChatPrompts extends React.Component {
                     flexDirection: "column",
                   }} onClick={() => {
                     this.props.sendMessage(prompt.text, "");
-                  }}>
+                  }}
+                  onMouseEnter={
+                    (e) => {
+                      e.currentTarget.style.backgroundColor = "#fafafa";
+                      e.currentTarget.style.transition = "background-color 0.2s";
+                    }
+                  }
+                  onMouseLeave={
+                    (e) => {
+                      e.currentTarget.style.backgroundColor = "#ffffff";
+                      e.currentTarget.style.transition = "background-color 0.2s";
+                    }
+                  }
+                  >
                     <div style={{
                       top: "10px",
                       left: "10px",
