@@ -55,7 +55,7 @@ func addEmbeddedVector(embeddingProviderObj embedding.EmbeddingProvider, text st
 
 	displayName := text
 	if len(text) > 25 {
-		displayName = text[:25]
+		displayName = string([]rune(text)[:25])
 	}
 
 	tokenCount := 0
