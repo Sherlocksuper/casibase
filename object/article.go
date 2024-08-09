@@ -16,7 +16,6 @@ package object
 
 import (
 	"fmt"
-
 	"github.com/casibase/casibase/util"
 	"xorm.io/core"
 )
@@ -104,6 +103,22 @@ func getArticle(owner string, name string) (*Article, error) {
 func GetArticle(id string) (*Article, error) {
 	owner, name := util.GetOwnerAndNameFromId(id)
 	return getArticle(owner, name)
+}
+
+func GetArticleCount(owner, field, value string) (int64, error) {
+	session := GetSession(owner, -1, -1, field, value, "", "")
+	return session.Count(&Article{})
+}
+
+func GetPaginationArticles(owner string, offset, limit int, field, value, sortField, sortOrder string) ([]*Article, error) {
+	articles := []*Article{}
+	session := GetSession(owner, offset, limit, field, value, sortField, sortOrder)
+	err := session.Find(&articles)
+	if err != nil {
+		return articles, err
+	}
+
+	return articles, nil
 }
 
 func UpdateArticle(id string, article *Article) (bool, error) {
