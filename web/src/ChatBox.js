@@ -13,10 +13,11 @@
 // limitations under the License.
 
 import React from "react";
-import {Alert, Button} from "antd";
+import {Alert, Button, Dropdown} from "antd";
 import {Avatar, ChatContainer, ConversationHeader, MainContainer, Message, MessageInput, MessageList} from "@chatscope/chat-ui-kit-react";
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import {updateMessage} from "./backend/MessageBackend";
+import * as StoreBackend from "./backend/StoreBackend";
 import {renderText} from "./ChatMessageRender";
 import * as Conf from "./Conf";
 import * as Setting from "./Setting";
@@ -24,7 +25,7 @@ import i18next from "i18next";
 import copy from "copy-to-clipboard";
 import moment from "moment";
 import {ThemeDefault} from "./Conf";
-import {AudioFilled, AudioOutlined, CopyOutlined, DislikeFilled, DislikeOutlined, LikeFilled, LikeOutlined, PauseCircleOutlined, PlayCircleOutlined, ReloadOutlined} from "@ant-design/icons";
+import {AudioFilled, AudioOutlined, CopyOutlined, DislikeFilled, DislikeOutlined, LikeFilled, LikeOutlined, PauseCircleOutlined, PlayCircleOutlined, ReloadOutlined, SelectOutlined} from "@ant-design/icons";
 import ChatPrompts from "./ChatPrompts";
 
 // store the input value when the name(chat) leaves
@@ -40,6 +41,8 @@ class ChatBox extends React.Component {
       currentReadingMessage: null,
       isReading: false,
       isVoiceInput: false,
+      stores: [],
+      selectedStore: {},
     };
     this.synth = window.speechSynthesis;
     this.recognition = undefined;
@@ -52,6 +55,7 @@ class ChatBox extends React.Component {
       this.synth.cancel();
     });
     this.addCursorPositionListener();
+    this.getStoresList();
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -64,11 +68,36 @@ class ChatBox extends React.Component {
       this.setState({value: inputStore.get(this.props.name)});
       inputStore.delete(this.props.name);
     }
+    // 父props的chat改变的时候，通过chat的store属性改变selectedStore
+    if (prevProps.chat?.store !== this.props.chat?.store && this.props.chat.store !== undefined) {
+      // eslint-disable-next-line no-console
+      console.log(this.state.stores);
+      // eslint-disable-next-line no-console
+      console.log(this.props.chat.store);
+      this.setState({
+        selectedStore: this.state.stores.find(store => store.name === this.props.chat?.store),
+      });
+    }
   }
 
   componentWillUnmount() {
     inputStore.set(this.props.name, this.state.value);
     this.clearOldStatus();
+  }
+
+  getStoresList() {
+    StoreBackend.getGlobalStores("", "", "", "", "", "", true).then((res) => {
+      // eslint-disable-next-line no-console
+      console.log(res);
+      if (res.status === "ok") {
+        this.setState({
+          stores: res?.data,
+          selectedStore: res.data.find(store => store.name === this.props.chat?.store),
+        });
+      } else {
+        Setting.showMessage("error", `Failed to get stores: ${res.msg}`);
+      }
+    });
   }
 
   clearOldStatus() {
@@ -410,6 +439,40 @@ class ChatBox extends React.Component {
     );
   }
 
+  renderStoreSelectMenu(stores) {
+    if (this.props.messages?.length ?? 0 === 0) {
+      return null;
+    }
+    const onClick = (e) => {
+      this.setState({
+        selectedStore: this.state.stores.find(store => store.name === e.key),
+      });
+    };
+
+    const items = stores.map((store, index) => {
+      return {
+        key: store.name,
+        label: store.displayName,
+      };
+    });
+    items.push({
+      type: "divider",
+    });
+    items.push({
+      key: "current chat store",
+      label: i18next.t("current store:") + (this.state.selectedStore?.displayName),
+      disabled: true,
+    });
+
+    return (
+      <Dropdown menu={{items, onClick}}>
+        <Button style={{border: "none", color: ThemeDefault.colorPrimary, backgroundColor: "transparent"}}>
+          <SelectOutlined />
+        </Button>
+      </Dropdown>
+    );
+  }
+
   render() {
     let title = Setting.getUrlParam("title");
     if (title === null) {
@@ -428,6 +491,9 @@ class ChatBox extends React.Component {
               (title === "") ? null : (
                 <ConversationHeader style={{backgroundColor: ThemeDefault.colorBackground, height: "42px"}}>
                   <ConversationHeader.Content userName={title} />
+                  <ConversationHeader.Actions>
+                    {this.renderStoreSelectMenu(this.state.stores)}
+                  </ConversationHeader.Actions>
                 </ConversationHeader>
               )
             }
@@ -501,7 +567,7 @@ class ChatBox extends React.Component {
             }
           </ChatContainer>
           {
-            !this.state.isVoiceInput ? messages.length !== 0 ? null : <ChatPrompts sendMessage={this.props.sendMessage} /> : this.renderVoiceInputHint()
+            !this.state.isVoiceInput ? (messages.length !== 0) ? null : <ChatPrompts sendMessage={this.props.sendMessage} prompts={this.state.selectedStore.prompts ?? []} /> : this.renderVoiceInputHint()
           }
         </MainContainer>
         <input

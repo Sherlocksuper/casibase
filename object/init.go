@@ -28,7 +28,7 @@ func InitDb() {
 }
 
 func initBuiltInStore() {
-	stores, err := GetGlobalStores()
+	stores, err := GetGlobalStores(false)
 	if err != nil {
 		panic(err)
 	}

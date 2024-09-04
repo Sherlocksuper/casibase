@@ -82,9 +82,20 @@ type Store struct {
 	PropertiesMap map[string]*Properties `xorm:"mediumtext" json:"propertiesMap"`
 }
 
-func GetGlobalStores() ([]*Store, error) {
+func GetGlobalStores(justUsable bool) ([]*Store, error) {
 	stores := []*Store{}
 	err := adapter.engine.Asc("owner").Desc("created_time").Find(&stores)
+
+	if justUsable {
+		usableStores := []*Store{}
+		for _, store := range stores {
+			if store.StorageProvider != "" && store.ModelProvider != "" && store.EmbeddingProvider != "" {
+				usableStores = append(usableStores, store)
+			}
+		}
+		return usableStores, nil
+	}
+
 	if err != nil {
 		return stores, err
 	}

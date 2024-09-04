@@ -35,9 +35,10 @@ func (c *ApiController) GetGlobalStores() {
 	value := c.Input().Get("value")
 	sortField := c.Input().Get("sortField")
 	sortOrder := c.Input().Get("sortOrder")
+	justUsable := c.Input().Get("justUsable")
 
 	if limit == "" || page == "" {
-		stores, err := object.GetGlobalStores()
+		stores, err := object.GetGlobalStores(justUsable == "true")
 		if err != nil {
 			c.ResponseError(err.Error())
 			return

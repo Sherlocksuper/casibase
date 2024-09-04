@@ -14,8 +14,8 @@
 
 import * as Setting from "../Setting";
 
-export function getGlobalStores(page = "", pageSize = "", field = "", value = "", sortField = "", sortOrder = "") {
-  return fetch(`${Setting.ServerUrl}/api/get-global-stores?p=${page}&pageSize=${pageSize}&field=${field}&value=${value}&sortField=${sortField}&sortOrder=${sortOrder}`, {
+export function getGlobalStores(page = "", pageSize = "", field = "", value = "", sortField = "", sortOrder = "", justUsable = false) {
+  return fetch(`${Setting.ServerUrl}/api/get-global-stores?p=${page}&pageSize=${pageSize}&field=${field}&value=${value}&sortField=${sortField}&sortOrder=${sortOrder}&justUsable=${justUsable}`, {
     method: "GET",
     credentials: "include",
     headers: {

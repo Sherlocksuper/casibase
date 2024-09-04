@@ -470,7 +470,7 @@ class ChatPage extends BaseListPage {
       const chat = chats[i];
       this.setState({
         chat: chat,
-        messages: null,
+        // messages: null,
       });
       this.getMessages(chat);
       this.goToLinkSoft(`/chat/${chat.name}`);
@@ -531,7 +531,7 @@ class ChatPage extends BaseListPage {
               </div>
             )
           }
-          <ChatBox disableInput={this.state.disableInput} messages={this.state.messages} sendMessage={(text, fileName, regenerate = false) => {this.sendMessage(text, fileName, false, regenerate);}} account={this.props.account} dots={this.state.dots} name={this.state.chat?.name} />
+          <ChatBox disableInput={this.state.disableInput} messages={this.state.messages} sendMessage={(text, fileName, regenerate = false) => {this.sendMessage(text, fileName, false, regenerate);}} account={this.props.account} dots={this.state.dots} name={this.state.chat?.name} chat={this.state.chat} />
         </div>
       </div>
     );
